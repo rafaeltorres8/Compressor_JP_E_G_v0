@@ -1,0 +1,13 @@
+2026-08-22 21:46:32,408 [INFO] Carpeta de destino: E:\Usuario\Escritorio\Editadas\comp_v0
+2026-08-22 21:46:32,410 [INFO] Se encontraron 6 imágenes candidatas.
+2026-08-22 21:46:32,410 [INFO] Procesando (1/6): 2afd8d6b73e395845067bb22121a8a8e@large.jpg
+2026-08-22 21:46:32,483 [INFO] Procesando (2/6): 2c1bafa073fe304f7b1f2699ea424ed3@large.jpg
+2026-08-22 21:46:32,496 [INFO] Procesando (3/6): IMG_1105.jpg
+2026-08-22 21:46:32,673 [INFO]  - Redimensionada a: 800x1200
+2026-08-22 21:46:32,683 [INFO] Procesando (4/6): IMG_1106.jpg
+2026-08-22 21:46:32,876 [INFO]  - Redimensionada a: 801x1200
+2026-08-22 21:46:32,887 [INFO] Procesando (5/6): IMG_1108j.jpg
+2026-08-22 21:46:33,070 [INFO]  - Redimensionada a: 801x1200
+2026-08-22 21:46:33,081 [INFO] Procesando (6/6): IMG_1110j.jpg
+2026-08-22 21:46:33,283 [INFO]  - Redimensionada a: 1200x800
+2026-08-22 21:46:33,294 [INFO] Completado. Procesadas=6, Errores=0

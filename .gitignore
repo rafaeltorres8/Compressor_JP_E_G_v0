@@ -1,0 +1,39 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# --- Entornos virtuales ---
+.venv/
+venv/
+env/
+ENV/
+
+# --- Variables de entorno / secretos (por si se añaden en el futuro) ---
+.env
+.env.*
+!.env.example
+
+# --- Herramientas de test / lint ---
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+
+# --- Salida propia de la app: no debe subirse al repo ---
+compresor_app.log
+compresor_app.log.*
+comp_v0/
+**/comp_v0/
+
+# --- Editor / SO ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
