@@ -62,7 +62,6 @@ Compressor_v2/
 ├── requirements.txt
 ├── requirements-dev.txt
 ├── pyproject.toml
-├── .github/workflows/ci.yml
 └── LICENSE
 ```
 
