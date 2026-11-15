@@ -1,6 +1,7 @@
 from __future__ import annotations
 import logging
 import os
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from threading import Event
@@ -24,6 +25,11 @@ class CompressionConfig:
             raise ValueError("La calidad debe ser un entero entre 1 y 100.")
         if self.max_size <= 0:
             raise ValueError("El ancho/alto máximo debe ser un entero positivo.")
+        name = self.destination_folder_name
+        if (not isinstance(name, str) or name in ("", ".", "..")
+                or Path(name).name != name or "/" in name or "\\" in name
+                or Path(name).is_absolute()):
+            raise ValueError("El destino debe ser el nombre de una subcarpeta del origen.")
 
 @dataclass(frozen=True)
 class ProcessResult:
@@ -70,13 +76,21 @@ class ImageCompressor:
 
     def _iter_source_images(self) -> list[Path]:
         images: list[Path] = []
+        self._check_cancelled()
         # followlinks=False (por defecto) evita que os.walk entre en
         # subcarpetas simbólicas que apunten fuera de source_folder.
         for current_root, _dirs, files in os.walk(self.source_folder):
+            self._check_cancelled()
             current_path = Path(current_root)
+            # Prune before os.walk descends, rather than visiting every output directory.
+            _dirs[:] = [name for name in _dirs
+                        if not self._is_within_destination(current_path / name)
+                        and not (current_path / name).is_symlink()
+                        and not getattr(current_path / name, "is_junction", lambda: False)()]
             if self._is_within_destination(current_path):
                 continue
             for filename in files:
+                self._check_cancelled()
                 if not filename.lower().endswith(VALID_EXTENSIONS):
                     continue
                 candidate = current_path / filename
@@ -90,6 +104,10 @@ class ImageCompressor:
                 images.append(candidate)
         return images
 
+    def _check_cancelled(self) -> None:
+        if self.cancel_event.is_set():
+            raise CancelledError()
+
     def _safe_target_path(self, source_image_path: Path) -> Path:
         relative = source_image_path.parent.relative_to(self.source_folder)
         target_dir = (self.destination_path / relative).resolve()
@@ -97,7 +115,10 @@ class ImageCompressor:
         if target_dir != destination_resolved and destination_resolved not in target_dir.parents:
             raise ValueError(f"Ruta de destino fuera de lo esperado: {target_dir}")
         target_dir.mkdir(parents=True, exist_ok=True)
-        return target_dir / source_image_path.name
+        target = target_dir / source_image_path.name
+        if target.is_symlink():
+            raise ValueError("El archivo de destino no puede ser un enlace simbólico.")
+        return target
 
     def _compress_one(self, source_image_path: Path) -> None:
         file_size = source_image_path.stat().st_size
@@ -126,15 +147,23 @@ class ImageCompressor:
                 img = img.resize(new_size, Image.Resampling.LANCZOS)
                 self._log(f" - Redimensionada a: {new_size[0]}x{new_size[1]}")
 
-            img.save(
-                destination_image_path,
-                "JPEG",
-                quality=self.config.quality,
-                optimize=True,
-            )
+            temporary_path = None
+            try:
+                with tempfile.NamedTemporaryFile(
+                    dir=destination_image_path.parent, suffix=".tmp", delete=False
+                ) as output:
+                    temporary_path = Path(output.name)
+                    img.save(output, "JPEG", quality=self.config.quality, optimize=True)
+                os.replace(temporary_path, destination_image_path)
+            finally:
+                if temporary_path is not None:
+                    temporary_path.unlink(missing_ok=True)
 
     def run(self) -> ProcessResult:
         self.config.validate()
+        self._check_cancelled()
+        if self.destination_path.resolve().parent != self.source_folder:
+            raise ValueError("La carpeta de destino debe permanecer dentro del origen.")
         self.destination_path.mkdir(parents=True, exist_ok=True)
         self._log(f"Carpeta de destino: {self.destination_path}")
 
