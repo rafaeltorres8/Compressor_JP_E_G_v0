@@ -145,6 +145,7 @@ class ImageCompressorApp:
         self.compress_button.config(state=tk.DISABLED)
         self.select_button.config(state=tk.DISABLED)
         self.cancel_button.config(state=tk.NORMAL)
+        self.progress["mode"] = "indeterminate"
         self.progress.start(10)
 
         self._cancel_event.clear()
@@ -208,13 +209,14 @@ class ImageCompressorApp:
         eventos que el worker fue dejando y actualiza la UI de forma segura.
         """
         try:
-            while True:
+            # Bound each batch so large folders cannot starve Tk's event loop.
+            for _ in range(100):
                 event = self._event_queue.get_nowait()
                 self._handle_event(event)
         except queue.Empty:
             pass
 
-        if self._worker_thread and self._worker_thread.is_alive():
+        if (self._worker_thread and self._worker_thread.is_alive()) or not self._event_queue.empty():
             self.root.after(100, self._poll_queue)
 
     def _handle_event(self, event: _Event) -> None:

@@ -3,7 +3,7 @@ name = "compresor-imagenes-jpeg"
 version = "2.0.0"
 description = "Aplicación de escritorio (Tkinter) para comprimir y redimensionar imágenes JPEG en lote."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { text = "MIT" }
 dependencies = [
     "Pillow>=12.1,<13",
@@ -20,7 +20,7 @@ dev = [
 # (widgets con varias opciones con nombre en una sola llamada) supera
 # fácilmente límites más cortos sin ganar legibilidad al partirlo.
 line-length = 120
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]

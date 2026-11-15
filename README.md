@@ -19,7 +19,7 @@ estructura de subcarpetas dentro de un directorio de salida.
 
 ## Requisitos
 
-- Python 3.9 o superior.
+- Python 3.10 o superior (requerido por Pillow 12).
 - Tkinter (incluido en la instalación estándar de Python en Windows y
   macOS; en Linux puede requerir instalar el paquete `python3-tk` con
   el gestor de paquetes de tu distribución).
@@ -62,7 +62,6 @@ Compressor_v2/
 ├── requirements.txt
 ├── requirements-dev.txt
 ├── pyproject.toml
-├── .github/workflows/ci.yml
 └── LICENSE
 ```
 
@@ -89,6 +88,12 @@ código:
 - **Rutas de destino verificadas**: cada archivo de salida se
   comprueba para que quede dentro de la carpeta de destino antes de
   escribirse (protección contra path traversal).
+- **Escritura mediante archivo temporal**: una imagen solo reemplaza el
+  resultado anterior después de guardarse por completo. Un error durante
+  el guardado conserva la salida previa. Las ejecuciones posteriores
+  reemplazan las imágenes de salida que tengan el mismo nombre.
+- **Búsqueda cancelable**: se comprueba la cancelación al recorrer carpetas
+  y se excluye el árbol de salida antes de descender a él.
 - **Manejo explícito de imágenes corruptas o falsificadas** (un
   archivo `.jpg` que en realidad no es una imagen válida se reporta
   como error y se omite, no interrumpe el resto del lote).
